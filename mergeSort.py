@@ -8,7 +8,8 @@ def conquer(left,right,array):
     #l and r- These will be my left and right partition counters.
     i = l = r = 0
     """
-    I like while loops here as they give my that infinite loop that will go on till I tell it to stop.
+    I like while loops here as they give my that infinite loop functionality with only the invariant to stop them.
+    Defining ranges as is the case with say for loops can be tricky so I find whiles better for general implementations.
     This loop here is the engine that will work on first gear, it will work on most of the cases, where there
     is something to compare in both the left and right partitions.
     I leave the code reading to you to figure out how this works.
