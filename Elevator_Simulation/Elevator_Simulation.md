@@ -261,7 +261,8 @@ The code is thoroughly commented so all sections and what they do should be clea
 
 # Create a new class for the 2nd strategy that inherits Building and Elavator classes
 class Strategy2(Building, Elevator):
-  def __init__(self, location = 0 , capacity=15, num_floors = 12, num_people = 400, log = True, optimal = False): #Predefined the arguments since we standardized them. 
+  def __init__(self, location = 0 , capacity=15, num_floors = 12, num_people = 400, log = True, optimal = False): 
+    #Predefined the arguments since we standardized them. 
     Building.__init__(self, num_floors = num_floors) #Inherited the Building Class and initialized it
     Elevator.__init__(self, location = location, capacity=capacity) #Inherited the elvator class and initiated it
     self.num_people = num_people #Initiated a class variable, num people
@@ -281,9 +282,14 @@ class Strategy2(Building, Elevator):
     passengers = {}#Initiate the passenger list token
     #Assign destinations
     for pas in range(0, num_passengers):#Create as many passengers as the num_passengers randomly generated
-      passengers[start_pass + pas] = {"Passenger_id":''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)]),#Unique passenger id created
-                         "Passenger": Passenger(location = floor, destination = random.choice([i for i in range(0,floor)]+[i for i in range(floor+1,self.num_floors)]),
-                                                at_destination = False)#Each passenger is instance of the passenger class. Random destinations selected
+      passengers[start_pass + pas] = {"Passenger_id":''.join([random.choice(string.ascii_letters + string.digits) 
+                                                              for n in range(8)]),#Unique passenger id created
+                         "Passenger": Passenger(location = floor, 
+                                                destination = random.choice(
+                                                    [i for i in range(0,floor)]+
+                                                    [i for i in range(floor+1,self.num_floors)]),
+                                                at_destination = False)
+                                      #Each passenger is instance of the passenger class. Random destinations selected
                         }
     return passengers
   
@@ -294,13 +300,19 @@ class Strategy2(Building, Elevator):
   """
   def spawn_passengers(self):
     for flo in range(self.num_floors):
-      pass_bunch = self.initiate(start = True, start_pass = 0, occupancy = self.capacity,  floor = self.location)#At the start, the starting passengers are 0, we spawn with full capacity and spawn as false
+      pass_bunch = self.initiate(start = True, start_pass = 0, occupancy = self.capacity, 
+                                 floor = self.location)
+    #At the start, the starting passengers are 0, we spawn with full capacity and spawn as false
       if self.log:
         print(f"Picked up {len(pass_bunch)} passengers on floor {flo}, empty space = {self.capacity - len(pass_bunch)}")
       #if the first floor is empty, it moves to the second and does the same:
       if len(pass_bunch) == 0:#We move up floors if the starting bunch is 0. we move up. 
-        #I was going to implement the logic such that we keep going up and when up we start going down if no passenger is found but the probability of that happening is so low at out capacity
-        #The code section would be almost vestigial at that point. There will always be someone to be picked up in the up movement and they would initiate the motion.
+        """
+        I was going to implement the logic such that we keep going up and when up we start going down 
+        if no passenger is found but the probability of that happening is so low at out capacity
+        The code section would be almost vestigial at that point. There will always be someone to be
+        picked up in the up movement and they would initiate the motion.
+        """
         self.move_up()
       else:
         break
@@ -325,11 +337,14 @@ class Strategy2(Building, Elevator):
     picked_up = len(passengers) #Counter for number of picked up passengers
     while len(passengers) >0:#Keep all passengers leave train
       cur_pas = passengers[order[0]]#The current passenger in service will always be the first one to enter on the ordered list
-      floor_count += abs(cur_pas['Passenger'].destination-cur_pas['Passenger'].location) #Count number of floors travelled: Is abs end(destination)- start(location)  for current passenger.
+      floor_count += abs(cur_pas['Passenger'].destination-cur_pas['Passenger'].location)
+        #Count number of floors travelled: Is abs end(destination)- start(location)  for current passenger.
       if self.log:
-        print(f"################################## Door open on on floor: {cur_pas['Passenger'].destination} ##################################")
+        print(f"################################## Door open on on floor: {cur_pas['Passenger'].destination}"\
+              +"##################################")
       """
-        To optimize the strategy, we will unload any passenger whose destinaation is reached regardless of entry order. It also cleans up the rare case(Due to randomization) where a passenger's enty and destination are the same. 
+        To optimize the strategy, we will unload any passenger whose destinaation is reached regardless of entry order. 
+        It also cleans up the rare case(Due to randomization) where a passenger's enty and destination are the same. 
       """
       if self.optimal:
         for  oe in order:#None the less, we will still check if any passenger has reached their = destination floor
@@ -341,7 +356,8 @@ class Strategy2(Building, Elevator):
             del passengers[oe]#Delete them from the token of current passengers if they are delivered
             if self.log:
               print(f"Delivered passenger {passen['Passenger_id']}, entry order {oe} on floor {passen['Passenger'].location}"\
-                    +f" to floor {passen['Passenger'].destination}. Empty space: {self.capacity -len(passengers)}")#Log statement showing they were delivered
+                    +f" to floor {passen['Passenger'].destination}. Empty space: {self.capacity -len(passengers)}")
+            #Log statement showing they were delivered
 
       else:
         oe = order[0]
@@ -352,23 +368,32 @@ class Strategy2(Building, Elevator):
         del passengers[oe]#Delete them from the token of current passengers if they are delivered
         if self.log:
           print(f"Delivered passenger {passen['Passenger_id']}, entry order {oe} on floor {passen['Passenger'].location}"\
-                  +f" to floor {passen['Passenger'].destination}. Empty space: {self.capacity -len(passengers)}")#Log statement showing they were delivered
+                  +f" to floor {passen['Passenger'].destination}. Empty space: {self.capacity -len(passengers)}")
+        #Log statement showing they were delivered
         
       #Pickup only till we have served stated num people. terminate when serving is done
       if picked_up < self.num_people:
-        pickup = self.initiate(start_pass = max(order)+1, occupancy = self.capacity - len(passengers), start=False, floor = cur_pas['Passenger'].destination)#At any floor, also pickup passengers. Start is false
+        pickup = self.initiate(start_pass = max(order)+1,
+                               occupancy = self.capacity - len(passengers),
+                               start=False, floor = cur_pas['Passenger'].destination)
+        #At any floor, also pickup passengers. Start is false
         picked_up += len(pickup)
       else:
-        pickup = {}#No pickup once we have "About" num_people passengers in elevator. This was limited since the last pickup can push this a bit over but rarely too much
+        pickup = {}
+        #No pickup once we have "About" num_people passengers in elevator. 
+        #This was limited since the last pickup can push this a bit over but rarely too much
       passengers = {**passengers, **pickup} #Combine token of generated and spawed passengers.
       if self.log:
-        print(f"Picked up {len(pickup)} passenger(s) on floor {cur_pas['Passenger'].destination},occupants: {len(passengers)}, empty space: {self.capacity - len(passengers)}")#Log picked up passengers
+        print(f"Picked up {len(pickup)} passenger(s) on floor {cur_pas['Passenger'].destination}"\
+              +f",occupants: {len(passengers)}, empty space: {self.capacity - len(passengers)}")#Log picked up passengers
       self.start_floor = cur_pas['Passenger'].location #Update the current starting floor.
       if self.log:
         print(f"Number of passengers left {len(passengers)} \n") #Make a statement about passengers left.
       order = list(passengers.keys())# Update the delivery order since some passengers have been unloaded.
       #Update floor count
-      if len(served) < self.num_people: #Only count the stops for specified number. The loop continues though to serve all passengers
+      if len(served) < self.num_people: 
+        #Only count the stops for specified number. 
+        #The loop continues though to serve all passengers
         stop_count+=1#Count the number of stops
     return {"Number of stops":stop_count, "Number of floors":floor_count, "Served Passsengers":served}
 
@@ -379,7 +404,8 @@ class Strategy2(Building, Elevator):
 #print(stats)
 
 #Test Case to illustrate delivery process
-el2 = Strategy2(capacity=15, num_floors =4, num_people = 20,log = True, optimal =True)#Include a log flag to turn on logs, optimal False
+el2 = Strategy2(capacity=15, num_floors =4, num_people = 20,log = True, optimal =True)
+#Include a log flag to turn on logs, optimal False
 stat = el2.deliver_passengers()
 print(f"Number of stops to deliver 20 people {stat['Number of stops']}")
 
@@ -399,8 +425,10 @@ It rarely happens thus why I didnt prioritize telling the elvator to keep going 
 """
 
 """
-This system focusses on the order of entry. At any exit, any passenger with that stop can leave regardless of the entry order,
-but the next stop it makes is the destination of the earliest passenger to enter in the bunch. It also picks up new passengers at each stop
+This system focusses on the order of entry. At any exit, any passenger with that 
+stop can leave regardless of the entry order,
+but the next stop it makes is the destination of the earliest passenger to enter in the bunch. 
+It also picks up new passengers at each stop
 
 
 Strategy 3 prioritizes the destination that has the most passengers. 
